@@ -37,10 +37,22 @@ for i in range(n_iters):
 
     # segment_start = torch.randint(low=0, high=len(), size=(1,)).item()
 
-    tokens = torch.stack([song[0][:max_length] for song in songs]).permute(1, 0)  # in this case, permute transposes the axes
-    # make this consistent with above
-    next_tokens = torch.stack([song[0][max_length] for song in songs])#.unsqueeze(-1)
-    durations = torch.stack([song[1][:max_length] for song in songs]).permute(1, 0)
+    max_song_length = max([len(song[0]) for song in songs])
+    max_length_in_iter = min(max_length, max_song_length)
+    tokens      = []
+    next_tokens = []
+    durations   = []
+    for song in songs:
+        start_idx = torch.randint(0, len(song)-max_length_in_iter)
+        next_idx   = start_idx + max_length_in_iter
+        tokens.append([song[0][start_idx:next_idx])
+        next_tokens.append([song[0][next_idx])
+        durations.append([song[1][start_idx:next_idx])
+
+    tokens = torch.stack(tokens).permute(1, 0)  # in this case, permute transposes the axes
+    next_tokens = torch.stack(next_tokens)
+    durations = torch.stack(durations).permute(1, 0)
+
 
     loss = model.train(tokens, next_tokens) # cross-entropy loss
     optimizer.zero_grad()
