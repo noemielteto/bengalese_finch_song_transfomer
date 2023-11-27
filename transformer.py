@@ -37,12 +37,12 @@ class Songformer(nn.Module):
         self.positional_encoding = PositionalEncoding(d_model=latent_dims, dropout=0.1, max_len=context_length)
 
         self.out = nn.Sequential(nn.Linear(latent_dims, ntokens))
-        
+
 
     def predict(self, z):
         h = self.out(z)
-        logits = h#torch.softmax(h, dim=-1)
-        return logits
+        #logits = h#torch.softmax(h, dim=-1)
+        return h
 
 
     def forward(self, x):
@@ -52,10 +52,10 @@ class Songformer(nn.Module):
 
         src_mask = nn.Transformer.generate_square_subsequent_mask(len(x))#.to(device)
 
-        
+
         z = self.transformer_encoder(x, src_mask)
         return z
-    
+
     def train(self, x, y):
         z = self(x)
         y_hat_logits = self.predict(z[-1, :, :])
@@ -68,7 +68,7 @@ class RhythmicSongformer(Songformer):
     def __init__(self, ntokens, latent_dims = 512, n_heads = 8, num_layers=3, context_length=100):
         super(RhythmicSongformer, self).__init__(ntokens, latent_dims, n_heads, num_layers, context_length)
 
-        
+
         self.embedding = nn.Linear(ntokens+1, latent_dims)
         self.out_duration = nn.Sequential(nn.Linear(latent_dims, 1))
 
@@ -77,7 +77,7 @@ class RhythmicSongformer(Songformer):
         pred_duration = self.out_duration(z)
         return logits_token, pred_duration
 
-    
+
     def train(self, x, y):
         z = self(x)
         y_tokens = y[:, :, :-1]
@@ -89,7 +89,7 @@ class RhythmicSongformer(Songformer):
         loss_token = loss_func(logits_token, y_tokens)
         loss_duration = loss_mse(pred_duration, y_duration)
         return loss_token + loss_duration
-    
+
 
 # model = Birdformer()
 
