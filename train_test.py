@@ -31,23 +31,19 @@ for i in range(n_iters):
     idx = torch.randint(len(train_idx), (batch_size, ))
     songs = [data[song_idx.item()] for song_idx in idx]
 
-    # song[0] is the token tensor
-    # TODO 1: clip max length when not possible
-    # TODO2: sample from different parts of the song
+    # song[0] is the token tensor; song[1] is the duration tensor
 
-    # segment_start = torch.randint(low=0, high=len(), size=(1,)).item()
-
-    max_song_length = max([len(song[0]) for song in songs])
-    max_length_in_iter = min(max_length, max_song_length)
+    min_song_length = min([len(song[0]) for song in songs])
+    max_length_in_iter = min(max_length, min_song_length) - 1  # minus one because the sequence has to contain one more element to be predicted
     tokens      = []
     next_tokens = []
     durations   = []
     for song in songs:
-        start_idx = torch.randint(0, len(song)-max_length_in_iter)
+        start_idx = torch.randint(low=0, high=len(song[0])-max_length_in_iter, size=(1,)).item()
         next_idx   = start_idx + max_length_in_iter
-        tokens.append([song[0][start_idx:next_idx])
-        next_tokens.append([song[0][next_idx])
-        durations.append([song[1][start_idx:next_idx])
+        tokens.append(song[0][start_idx:next_idx])
+        next_tokens.append(song[0][next_idx])
+        durations.append(song[1][start_idx:next_idx])
 
     tokens = torch.stack(tokens).permute(1, 0)  # in this case, permute transposes the axes
     next_tokens = torch.stack(next_tokens)
@@ -62,10 +58,7 @@ for i in range(n_iters):
     print(loss.item())
     losses.append(loss.item())
 
-    # todo look at pred probs
-    def predict(self, z):
-        h = self.out(z)
-        #logits = h#torch.softmax(h, dim=-1)
-        return h
-
-len(data.keys())
+# Evaluation
+x = torch.tensor([1,1,1])
+z = model.forward(x)
+h = model.predict(z)
