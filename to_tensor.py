@@ -79,6 +79,10 @@ for i, bird in enumerate(birds):
 
     all_syls = set(all_syls)
     syl2idx = {syl:i for i, syl in enumerate(all_syls)}
+    idx2syl = {i:syl for i, syl in enumerate(all_syls)} # inverse mapping
+
+    torch.save({'syl2idx': syl2idx, 'idx2syl':idx2syl}, f'data/{bird}_syllable_mapping.pt')
+
 
     for j, song in enumerate(song_list):
 
@@ -87,3 +91,27 @@ for i, bird in enumerate(birds):
 
     torch.save(data_dict, f'data/{bird}_torch.pt')
 
+
+
+
+syl_list2 = []
+for j, song in enumerate(song_list):
+    syl_list2 += song.tolist()
+
+syl_list2
+
+set(syl_list2)
+all_syls
+len(data_dict)
+
+all_songs_tokens_flattened = torch.cat([data_dict[k][0] for k in data_dict.keys()])
+[data_dict[k][0] for k in data_dict.keys()]
+
+
+all_songs_tokens_flattened.argmax()
+
+
+song_list
+set(np.array(song_list).ravel().tolist())
+
+song_list
